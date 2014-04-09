@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="createEmptyContentRootDirectories" value="true" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="$USER_HOME$/.gradle/wrapper/dists/gradle-1.11-all/7qd8qq8te5j4f5q9aaei3gh3lj/gradle-1.11" />
+        <option name="modules">
+          <set>
+            <option value="E:\Projects\MoodleGIFT" />
+            <option value="E:\Projects\MoodleGIFT\app" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+    <option name="offlineWork" value="true" />
+  </component>
+</project>
+
