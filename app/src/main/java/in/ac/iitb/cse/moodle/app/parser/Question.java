@@ -2,11 +2,13 @@ package in.ac.iitb.cse.moodle.app.parser;
 
 import java.util.ArrayList;
 
+import static in.ac.iitb.cse.moodle.app.parser.Vars.Regex;
+
 public
 class Question{
 	String title;
 	String text;
-	Format format;
+	Regex  regex;
 	ArrayList<Answer> answers=new ArrayList<>();
 
 	public
@@ -18,25 +20,27 @@ class Question{
 		if(title.isEmpty()) title=text;
 		str=str.replace(text,"").replace("{","");
 		String parts[]=str.split("\\}");
-		format=findFormat(str);
-		answers=findAnswers(parts[0],format);
+		regex=findRegex(str);
+		answers=findAnswers(parts[0],regex);
 		if(parts.length>1) text+=" ___ "+parts[1];
-
 	}
 
 	private
-	ArrayList<Answer> findAnswers(String str,Format format){
+	ArrayList<Answer> findAnswers(String str,Regex format){
 		ArrayList<Answer> answers=new ArrayList<>();
+		String ans;
 		switch(format){
 			case MULTIPLE_CHOICE:
-				String ans="";
 				for(String temp=str;!temp.isEmpty();temp=temp.replace(ans,"").trim()){
 					ans=findNextAnswer(temp);
 					answers.add(new Answer(ans));
 				}
 				break;
 			case MULTIPLE_RIGHT:
-
+				for(String temp=str;!temp.isEmpty();temp=temp.replace(ans,"").trim()){
+					ans=findNextAnswer(temp);
+					answers.add(new Answer(ans));
+				}
 				break;
 			case TRUE_FALSE:
 				break;
@@ -58,32 +62,22 @@ class Question{
 
 	private
 	String findNextAnswer(String temp){
-		String par;
+		String ans;
 		int right=temp.indexOf("=",1);
 		int wrong=temp.indexOf("~",1);
 		int index=right<wrong?right:wrong;
 		if(wrong<0) index=right;
 		if(right<0) index=wrong;
 		if(index<0) index=temp.length();
-		par=temp.substring(0,index);
-		return par;
+		ans=temp.substring(0,index);
+		return ans;
 	}
 
 	private
-	Format findFormat(String str){
-		format=Format.MULTIPLE_CHOICE;
-		if(!str.contains("}")) return Format.DESCRIPTION;
-		if(str.equalsIgnoreCase("}")) return Format.ESSAY;
-		if(str.startsWith("#")) return Format.NUMERICAL;
-		if(str.equalsIgnoreCase("true")
-		   ||str.equalsIgnoreCase("false")
-		   ||str.equalsIgnoreCase("t")
-		   ||str.equalsIgnoreCase("f")) return Format.TRUE_FALSE;
-		if(str.contains("->")&&str.contains("=")) return Format.MATCHING;
-		if(!str.contains("~")) return Format.SHORT_ANSWER;
-		if(str.contains("=")&&str.replaceAll("[^=]", "").length()>1) return Format.MULTIPLE_RIGHT;
-//		if(str.trim().length()>str.indexOf("}")+1) return Format.MISSING_WORD;
-		return format;
+	Regex findRegex(String str){
+		for(Regex regex : Regex.values())
+			if(regex.matches(str)) return regex;
+		return Regex.DESCRIPTION;
 	}
 
 	private
@@ -101,7 +95,8 @@ class Question{
 		return title;
 	}
 
-	@Override public
+	@Override
+	public
 	String toString(){
 		return "\n::"+getTitle()+"::"+"\n"+getText()+"\n{"+getAnswers()+"\n}\n";
 	}
@@ -125,21 +120,8 @@ class Question{
 	}
 
 	public
-	Format getFormat(){
-		return format;
-	}
-
-	public
-	enum Format{
-		MULTIPLE_CHOICE,
-		MULTIPLE_RIGHT,
-		TRUE_FALSE,
-		SHORT_ANSWER,
-		MATCHING,
-		MISSING_WORD,
-		NUMERICAL,
-		ESSAY,
-		DESCRIPTION
+	Regex getRegex(){
+		return regex;
 	}
 
 	public

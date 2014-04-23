@@ -10,12 +10,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
+import in.ac.iitb.cse.moodle.app.formats.QuestionDisplay;
 import in.ac.iitb.cse.moodle.app.parser.Question;
 
 public
@@ -36,17 +38,8 @@ class MainActivity extends Activity implements TextToSpeech.OnInitListener{
 
 	@Override
 	protected
-	void onActivityResult(int requestCode,int resultCode,Intent data){
-		if(requestCode==0){
-			if(resultCode==TextToSpeech.Engine.CHECK_VOICE_DATA_PASS){
-				tts=new TextToSpeech(this,this);
-			}
-			else{
-				Intent installTTSIntent=new Intent();
-				installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-				startActivity(installTTSIntent);
-			}
-		}
+	void onDestroy(){
+		super.onDestroy();
 	}
 
 	@Override
@@ -72,8 +65,17 @@ class MainActivity extends Activity implements TextToSpeech.OnInitListener{
 
 	@Override
 	protected
-	void onDestroy(){
-		super.onDestroy();
+	void onActivityResult(int requestCode,int resultCode,Intent data){
+		if(requestCode==0){
+			if(resultCode==TextToSpeech.Engine.CHECK_VOICE_DATA_PASS){
+				tts=new TextToSpeech(this,this);
+			}
+			else{
+				Intent installTTSIntent=new Intent();
+				installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+				startActivity(installTTSIntent);
+			}
+		}
 	}
 
 	@Override
@@ -85,9 +87,6 @@ class MainActivity extends Activity implements TextToSpeech.OnInitListener{
 		else Toast.makeText(getApplicationContext(),"Failed",Toast.LENGTH_LONG).show();
 	}
 
-	/**
-	 * A placeholder fragment containing a simple view.
-	 */
 	public static
 	class PlaceholderFragment extends Fragment{
 		public
@@ -98,9 +97,17 @@ class MainActivity extends Activity implements TextToSpeech.OnInitListener{
 		public
 		View onCreateView(LayoutInflater inflater,ViewGroup container,Bundle savedInstanceState){
 			View rootView=inflater.inflate(R.layout.fragment_main,container,false);
-			((TextView)rootView.findViewById(R.id.textView)).setText(makeFileIoText(getQuestions
-			                                                                          ("sample"
-			                                                                                     +".json")));
+			ArrayList<String> questions=getQuestions("sample"+".gift");
+			((TextView)rootView.findViewById(R.id.textView)).setText(makeFileIoText(questions));
+			Button start=(Button)rootView.findViewById(R.id.start);
+			start.setOnClickListener(new View.OnClickListener(){
+				@Override
+				public
+				void onClick(View v){
+					Intent intent=new Intent(getActivity(),QuestionDisplay.class);
+					startActivity(intent);
+				}
+			});
 			return rootView;
 		}
 
@@ -115,21 +122,26 @@ class MainActivity extends Activity implements TextToSpeech.OnInitListener{
 		}
 
 		private
-		String makeFileIoText(ArrayList<String> questions){
-			StringBuilder sb=new StringBuilder();
-			for(String str : questions)
-				sb.append(new Question(str));
-			return sb.toString();
+		String readAllQuestions(String file){
+			return "Who was Einstein?"
+			       +"{=Scientist#You are awesome ~%25%Mad fellow#Not really ~Cricketer}This is "
+			       +
+			       "extra\n\n"
+			       +"::Dogs::Who let the dogs out? "
+			       +"{~Driver#No way ~%50%Maid#Which maid? ~%25%Servant#Which servant? "
+			       +
+			       "=Kanta#Thats right}";
 		}
 
 		private
-		String readAllQuestions(String file){
-			return "Who was Einstein?"
-			       +"{=Scientist#You are awesome ~%25%Mad fellow#Not really ~Cricketer}This is " +
-			       "extra\n\n"
-			       +"::Dogs::Who let the dogs out? "
-			       +"{~Driver#No way ~%50%Maid#Which maid? ~%25%Servant#Which servant? " +
-			       "=Kanta#Thats right}";
+		String makeFileIoText(ArrayList<String> question_strings){
+			StringBuilder sb=new StringBuilder();
+			for(String str : question_strings){
+				Question question=new Question(str);
+				sb.append(question);
+				QuestionDisplay.questions.add(question);
+			}
+			return sb.toString();
 		}
 	}
 }
